@@ -9,7 +9,7 @@ function App() {
     const [matadorPosition, setMatadorPosition] = useState(0);
     const [applause, setApplause] = useState(0);
   
-    // This function is just for demonstration. You should replace it with your actual logic.
+
     const handleApplauseChange = (newApplause: number) => {
       setApplause(newApplause);
   };

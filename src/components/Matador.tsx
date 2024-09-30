@@ -10,7 +10,7 @@ interface MatadorProps {
     matadorPosition: number;
 }
 
-export const Matador: React.FC<MatadorProps> = React.memo(({ applause, setMatarodPosition, matadorPosition }) => {
+const MatadorComponent: React.FC<MatadorProps> = ({ applause, setMatarodPosition, matadorPosition }) => {
     const [previousApplause, setPreviousApplause] = useState<number | null>(null);
 
     // Function to play applause sound based on applause value
@@ -36,8 +36,6 @@ export const Matador: React.FC<MatadorProps> = React.memo(({ applause, setMataro
     };
 
     useEffect(() => {
-        console.log("Matador is mounted");
-
         const handleBullRun = (event: CustomEvent) => {
             const newPosition = event.detail.position;
 
@@ -50,7 +48,6 @@ export const Matador: React.FC<MatadorProps> = React.memo(({ applause, setMataro
                 } while (newMatadorPosition === matadorPosition);
 
                 setMatarodPosition(newMatadorPosition);
-                console.log(`Matador is moving from ${matadorPosition} to ${newMatadorPosition}`);
             }
         };
 
@@ -58,21 +55,13 @@ export const Matador: React.FC<MatadorProps> = React.memo(({ applause, setMataro
 
         return () => {
             document.removeEventListener("bullRun", handleBullRun as EventListener);
-            console.log("Matador is unmounted");
         };
     }, [matadorPosition, setMatarodPosition]);
 
     useEffect(() => {
-        if (applause === 3 && applause !== previousApplause) {
-            console.log("Matador is reacting to applause");
-            setPreviousApplause(3);
-        } else if (applause !== 3) {
-            setPreviousApplause(applause);
-        }
-
-        // Play sound when applause changes and is not equal to previous value
         if (applause !== previousApplause) {
             playApplauseSound(applause);
+            setPreviousApplause(applause);
         }
     }, [applause, previousApplause]);
 
@@ -81,4 +70,14 @@ export const Matador: React.FC<MatadorProps> = React.memo(({ applause, setMataro
             {applause === 3 ? <div>🎉 Matador is here! 🎉</div> : <div>🕺 Matador</div>}
         </div>
     );
+};
+
+// Memoizing the component to prevent unnecessary re-renders
+export const Matador = React.memo(MatadorComponent, (prevProps, nextProps) => {
+    // Re-render only if applause changes and becomes 3
+    if (nextProps.applause === 3 && prevProps.applause !== 3) {
+        return false; // Allow re-render
+    }
+    // Prevent re-render in all other cases
+    return true;
 });

@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
 import applauseSound1 from "./applause/applause-1.mp3";
 import applauseSound2 from "./applause/applause-2.mp3";
 import applauseSound3 from "./applause/applause-3.mp3";
@@ -14,7 +14,7 @@ interface OldMatadorState {
   previousApplause: number | null;
 }
 
-class OldMatador extends PureComponent<OldMatadorProps, OldMatadorState> {
+class OldMatador extends Component<OldMatadorProps, OldMatadorState> {
   constructor(props: OldMatadorProps) {
     super(props);
     this.state = {
@@ -49,13 +49,18 @@ class OldMatador extends PureComponent<OldMatadorProps, OldMatadorState> {
   }
 
   componentDidUpdate(prevProps: OldMatadorProps) {
-    if (this.props.applause === 3 && this.props.applause !== this.state.previousApplause) {
-      console.log("Matador is reacting to applause");
+    if (this.props.applause !== this.state.previousApplause) {
       this.playApplauseSound(this.props.applause);
       this.setState({ previousApplause: this.props.applause });
-    } else if (this.props.applause !== this.state.previousApplause) {
-      this.setState({ previousApplause: this.props.applause });
     }
+  }
+
+  shouldComponentUpdate(nextProps: OldMatadorProps, nextState: OldMatadorState) {
+   
+    if (nextProps.applause === 3 && this.state.previousApplause !== 3) {
+      return true;
+    }
+    return false;
   }
 
   playApplauseSound(applause: number) {
@@ -80,12 +85,14 @@ class OldMatador extends PureComponent<OldMatadorProps, OldMatadorState> {
   }
 
   render() {
+    const { applause } = this.props;
     return (
       <div>
-        {this.props.applause === 3 ? <div>🎉 Old Matador is here! 🎉</div> : <div>🕺 Old Matador</div>}
+        {applause === 3 ? <div>🎉 Old Matador is here! 🎉</div> : <div>🕺 Old Matador</div>}
       </div>
     );
   }
+  
 }
 
 export default OldMatador;

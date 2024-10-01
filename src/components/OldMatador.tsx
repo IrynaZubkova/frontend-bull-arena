@@ -1,98 +1,89 @@
-import React, { Component } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import applauseSound1 from "./applause/applause-1.mp3";
 import applauseSound2 from "./applause/applause-2.mp3";
 import applauseSound3 from "./applause/applause-3.mp3";
 import applauseSound4 from "./applause/applause-4.mp3";
 
-interface OldMatadorProps {
-  applause: number;
-  setMatarodPosition: (position: number) => void;
-  matadorPosition: number;
+interface MatadorProps {
+    applause: number;
+    setMatarodPosition: (position: number) => void;
+    matadorPosition: number;
 }
 
-interface OldMatadorState {
-  previousApplause: number | null;
-}
+const MatadorComponent: React.FC<MatadorProps> = ({ applause, setMatarodPosition, matadorPosition }) => {
+    const previousApplause = useRef<number>(0);  // Store the previous applause value
+    const [shouldRerender, setShouldRerender] = useState(false); // Control re-render
 
-class OldMatador extends Component<OldMatadorProps, OldMatadorState> {
-  constructor(props: OldMatadorProps) {
-    super(props);
-    this.state = {
-      previousApplause: null,
+    // Function to play applause sound based on the applause value
+    const playApplauseSound = (applause: number) => {
+        const audio = new Audio();
+        switch (applause) {
+            case 0:
+                audio.src = applauseSound1;
+                break;
+            case 1:
+                audio.src = applauseSound2;
+                break;
+            case 2:
+                audio.src = applauseSound3;
+                break;
+            case 3:
+                audio.src = applauseSound4;
+                break;
+            default:
+                return;
+        }
+        audio.play();
     };
-    this.handleBullRun = this.handleBullRun.bind(this);
-  }
 
-  componentDidMount() {
-    document.addEventListener("bullRun", this.handleBullRun as EventListener);
-  }
+    useEffect(() => {
+        // Handle matador movement when the "bullRun" event is triggered
+        const handleBullRun = (event: CustomEvent) => {
+            const newPosition = event.detail.position;
 
-  componentWillUnmount() {
-    document.removeEventListener("bullRun", this.handleBullRun as EventListener);
-  }
+            if (newPosition === matadorPosition) {
+                let newMatadorPosition;
+                do {
+                    newMatadorPosition = Math.floor(Math.random() * 9);
+                } while (newMatadorPosition === matadorPosition);
 
-  handleBullRun(event: Event) {
-    const customEvent = event as CustomEvent;
-    const newPosition = customEvent.detail.position;
+                setMatarodPosition(newMatadorPosition);
+            }
+        };
 
-    if (newPosition === this.props.matadorPosition) {
-      const getRandomPosition = () => Math.floor(Math.random() * 9);
-      let newMatadorPosition;
+        document.addEventListener("bullRun", handleBullRun as EventListener);
 
-      do {
-        newMatadorPosition = getRandomPosition();
-      } while (newMatadorPosition === this.props.matadorPosition);
+        return () => {
+            document.removeEventListener("bullRun", handleBullRun as EventListener);
+        };
+    }, [matadorPosition, setMatarodPosition]);
 
-      console.log(`Matador is moving from ${this.props.matadorPosition} to ${newMatadorPosition}`);
-      this.props.setMatarodPosition(newMatadorPosition);
-    }
-  }
+    useEffect(() => {
+        // If applause value has changed
+        if (applause !== previousApplause.current) {
+            playApplauseSound(applause);
+            previousApplause.current = applause;
 
-  componentDidUpdate(prevProps: OldMatadorProps) {
-    if (this.props.applause !== this.state.previousApplause) {
-      this.playApplauseSound(this.props.applause);
-      this.setState({ previousApplause: this.props.applause });
-    }
-  }
+            // Trigger re-render if applause equals 3
+            if (applause === 3) {
+                setShouldRerender(!shouldRerender);
+            }
+        }
+    }, [applause]);
 
-  shouldComponentUpdate(nextProps: OldMatadorProps, nextState: OldMatadorState) {
-   
-    if (nextProps.applause === 3 && this.state.previousApplause !== 3) {
-      return true;
-    }
-    return false;
-  }
-
-  playApplauseSound(applause: number) {
-    const audio = new Audio();
-    switch (applause) {
-      case 0:
-        audio.src = applauseSound1;
-        break;
-      case 1:
-        audio.src = applauseSound2;
-        break;
-      case 2:
-        audio.src = applauseSound3;
-        break;
-      case 3:
-        audio.src = applauseSound4;
-        break;
-      default:
-        return;
-    }
-    audio.play();
-  }
-
-  render() {
-    const { applause } = this.props;
     return (
-      <div>
-        {applause === 3 ? <div>🎉 Old Matador is here! 🎉</div> : <div>🕺 Old Matador</div>}
-      </div>
+        <div>
+            {applause === 3 ? <div>🎉 Matador is here with applause 3! 🎉</div> : <div>🕺 Matador</div>}
+        </div>
     );
-  }
-  
-}
+};
 
-export default OldMatador;
+// Memoize the component to avoid unnecessary re-renders
+export const Matador = React.memo(MatadorComponent, (prevProps, nextProps) => {
+    // Allow re-render only if applause has changed and equals 3
+    if (nextProps.applause === 3 && prevProps.applause !== 3) {
+        return false; // Allow re-render
+    }
+    // Prevent re-render in all other cases
+    return true;
+});

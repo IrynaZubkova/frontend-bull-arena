@@ -1,10 +1,7 @@
-Функціональний стиль. Матадор.
-+ Новий компонент MatadorComponent: У новій версії код компонента винесено в окрему функцію MatadorComponent
-+ Додано React.memo з умовним контролем рендерингу. 
-+ Спрощена умова для applause: якщо значення applause змінилося, незалежно від його значення, викликається функція відтворення звуку і оновлюється стан попереднього applause.
+This React project implements a "matador" component that reacts to applause levels and a custom "bullRun" event. The component plays different applause sounds based on the applause value and moves the matador to a new position when the event occurs. If applause reaches level 3, a celebratory message is displayed. To optimize performance, rerenders are controlled with React.memo, ensuring the component only updates when necessary, such as when applause equals 3 or the matador changes position. The project adds an interactive experience with sounds and visual feedback based on events and state changes.
 
-Класовий стиль. ОлдМатадор
-+ Заміна PureComponent на Component
-+ Додано метод shouldComponentUpdate для оптимізації рендерів. 
-+ Зміна логіки в componentDidUpdate
-У старому коді були дві окремі перевірки для значення applause і попереднього значення. У новому коді ці перевірки об’єднані, і коли значення applause змінюється, просто викликається метод playApplauseSound.
+
+
+
+
+
